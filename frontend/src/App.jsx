@@ -179,15 +179,15 @@ const Dashboard = () => {
       <h2 className="text-3xl font-black uppercase tracking-tight text-gray-900">Citizen Dashboard</h2>
       
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <Link to="/my-documents" className="bg-white/30 hover:bg-white/70 backdrop-blur-2xl border border-white/60 hover:border-emerald-500/50 p-8 rounded-2xl transition-all group flex flex-col items-center justify-center text-center space-y-4 shadow-xl">
+        <Link to="/my-documents" className="bg-gradient-to-r from-white/30 to-emerald-500/[0.03] hover:from-white/50 hover:to-emerald-500/[0.08] backdrop-blur-2xl border border-white/60 border-r-emerald-500/30 hover:border-emerald-500/40 p-8 rounded-2xl transition-all group flex flex-col items-center justify-center text-center space-y-4 shadow-xl">
           <span className="text-4xl group-hover:scale-110 transition-transform">📂</span>
           <span className="text-xs font-black uppercase tracking-widest text-gray-700 group-hover:text-emerald-600">My Uploaded Documents</span>
         </Link>
-        <Link to="/upload" className="bg-emerald-500/10 hover:bg-emerald-500/20 backdrop-blur-2xl border border-emerald-500/30 hover:border-emerald-500/60 p-8 rounded-2xl transition-all group flex flex-col items-center justify-center text-center space-y-4 shadow-xl">
+        <Link to="/upload" className="bg-emerald-500/5 hover:bg-emerald-500/10 backdrop-blur-2xl border border-emerald-500/15 hover:border-emerald-500/40 p-8 rounded-2xl transition-all group flex flex-col items-center justify-center text-center space-y-4 shadow-xl">
           <span className="text-4xl group-hover:scale-110 transition-transform">📤</span>
-          <span className="text-xs font-black uppercase tracking-widest text-emerald-700 group-hover:text-emerald-600">Upload New RTI</span>
+          <span className="text-xs font-black uppercase tracking-widest text-emerald-600 group-hover:text-emerald-500">Upload New RTI</span>
         </Link>
-        <Link to="/search" className="bg-white/30 hover:bg-white/70 backdrop-blur-2xl border border-white/60 hover:border-emerald-500/50 p-8 rounded-2xl transition-all group flex flex-col items-center justify-center text-center space-y-4 shadow-xl">
+        <Link to="/search" className="bg-gradient-to-l from-white/30 to-emerald-500/[0.03] hover:from-white/50 hover:to-emerald-500/[0.08] backdrop-blur-2xl border border-white/60 border-l-emerald-500/30 hover:border-emerald-500/40 p-8 rounded-2xl transition-all group flex flex-col items-center justify-center text-center space-y-4 shadow-xl">
           <span className="text-4xl group-hover:scale-110 transition-transform">🔍</span>
           <span className="text-xs font-black uppercase tracking-widest text-gray-700 group-hover:text-emerald-600">Search Database</span>
         </Link>
