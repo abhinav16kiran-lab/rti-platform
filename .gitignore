@@ -1,0 +1,22 @@
+# Python virtual environments
+backend/venv/
+venv/
+ENV/
+
+# Python compiled bytecode
+**/__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Operating system files
+.DS_Store
+Thumbs.db
+
+# Dynamic runtime uploads and local test documents
+backend/static/uploads/*
+backend/local_pdf_store/*.pdf
+
+# IDE configurations
+.vscode/
+.idea/
