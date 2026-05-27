@@ -224,25 +224,6 @@ const SearchPage = () => {
       <div className="space-y-6">
         <h2 className="text-3xl font-black uppercase tracking-tight">Search Ledger</h2>
         
-        {/* Ministry Chips */}
-        <div className="flex flex-wrap gap-2">
-          <button 
-            onClick={() => setSelectedDept('')}
-            className={`px-3 py-1.5 rounded-lg text-[10px] font-mono tracking-widest uppercase border transition-colors ${selectedDept === '' ? 'bg-emerald-500/20 border-emerald-500 text-emerald-400' : 'border-white/10 text-gray-400 hover:border-white/30'}`}
-          >
-            ALL
-          </button>
-          {departments.map(dept => (
-            <button 
-              key={dept}
-              onClick={() => setSelectedDept(dept)}
-              className={`px-3 py-1.5 rounded-lg text-[10px] font-mono tracking-widest uppercase border transition-colors ${selectedDept === dept ? 'bg-emerald-500/20 border-emerald-500 text-emerald-400' : 'border-white/10 text-gray-400 hover:border-white/30'}`}
-            >
-              {dept}
-            </button>
-          ))}
-        </div>
-
         <form onSubmit={handleSearch} className="flex gap-3 bg-white/[0.02] border border-white/10 p-2 rounded-2xl shadow-2xl backdrop-blur-xl focus-within:border-emerald-500/40 transition-colors">
           <input 
             type="text" 
@@ -275,6 +256,56 @@ const SearchPage = () => {
              </div>
           </div>
         )}
+
+        {/* Ministry Cards Grid */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 pt-4">
+          <div 
+            onClick={() => setSelectedDept('')}
+            className={`bg-white/[0.02] backdrop-blur-md rounded-xl p-6 border-t-4 border-t-gray-500 border-x border-b border-x-white/5 border-b-white/5 hover:bg-white/[0.05] transition-all cursor-pointer shadow-lg group relative ${selectedDept === '' ? 'ring-2 ring-emerald-500 bg-white/[0.05]' : ''}`}
+          >
+            <div className="w-10 h-10 rounded-full bg-gray-500/20 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+              <span className="text-gray-400 text-lg">📁</span>
+            </div>
+            <h3 className="text-white font-bold text-lg mb-2">All Ministries</h3>
+            <p className="text-gray-400 text-xs">Search across all available government departments and ministries.</p>
+            <span className="absolute top-6 right-6 text-gray-500 group-hover:text-white transition-colors">↗</span>
+          </div>
+
+          {departments.map((dept, idx) => {
+            const colors = ['emerald', 'blue', 'red', 'orange', 'pink', 'purple', 'teal', 'cyan'];
+            const color = colors[idx % colors.length];
+            const borderColors = {
+              emerald: 'border-t-emerald-500', blue: 'border-t-blue-500', red: 'border-t-red-500', 
+              orange: 'border-t-orange-500', pink: 'border-t-pink-500', purple: 'border-t-purple-500', 
+              teal: 'border-t-teal-500', cyan: 'border-t-cyan-500'
+            };
+            const bgColors = {
+              emerald: 'bg-emerald-500/20', blue: 'bg-blue-500/20', red: 'bg-red-500/20', 
+              orange: 'bg-orange-500/20', pink: 'bg-pink-500/20', purple: 'bg-purple-500/20', 
+              teal: 'bg-teal-500/20', cyan: 'bg-cyan-500/20'
+            };
+            const textColors = {
+              emerald: 'text-emerald-400', blue: 'text-blue-400', red: 'text-red-400', 
+              orange: 'text-orange-400', pink: 'text-pink-400', purple: 'text-purple-400', 
+              teal: 'text-teal-400', cyan: 'text-cyan-400'
+            };
+            
+            return (
+              <div 
+                key={dept}
+                onClick={() => setSelectedDept(dept)}
+                className={`bg-white/[0.02] backdrop-blur-md rounded-xl p-6 border-t-4 ${borderColors[color]} border-x border-b border-x-white/5 border-b-white/5 hover:bg-white/[0.05] transition-all cursor-pointer shadow-lg group relative ${selectedDept === dept ? 'ring-2 ring-white/50 bg-white/[0.05]' : ''}`}
+              >
+                <div className={`w-10 h-10 rounded-full ${bgColors[color]} flex items-center justify-center mb-4 group-hover:scale-110 transition-transform`}>
+                  <span className={`${textColors[color]} text-lg`}>🏛️</span>
+                </div>
+                <h3 className="text-white font-bold text-lg mb-2">{dept}</h3>
+                <p className="text-gray-400 text-xs line-clamp-3">Explore public documents and RTI responses filed under {dept}.</p>
+                <span className={`absolute top-6 right-6 ${textColors[color]} opacity-50 group-hover:opacity-100 transition-opacity`}>↗</span>
+              </div>
+            );
+          })}
+        </div>
       </div>
     </div>
   );
