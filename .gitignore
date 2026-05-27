@@ -16,7 +16,11 @@ Thumbs.db
 # Dynamic runtime uploads and local test documents
 backend/static/uploads/*
 backend/local_pdf_store/*.pdf
+instance/
 
 # IDE configurations
 .vscode/
 .idea/
+
+# Environment files
+.env

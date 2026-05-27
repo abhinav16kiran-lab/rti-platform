@@ -1,10 +1,11 @@
 from flask_sqlalchemy import SQLAlchemy
+from flask_login import UserMixin
 from datetime import datetime
 
 # Initialize the SQLAlchemy instance
 db = SQLAlchemy()
 
-class User(db.Model):
+class User(db.Model, UserMixin):
     __tablename__ = 'users'
     
     id = db.Column(db.Integer, primary_key=True)
@@ -23,6 +24,7 @@ class RTIPost(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
     title = db.Column(db.String(255), nullable=False)
+    description = db.Column(db.Text, nullable=False, default="No description provided")
     department = db.Column(db.String(100), nullable=False)
     state = db.Column(db.String(100), nullable=True)
     pdf_url = db.Column(db.Text, nullable=False)
@@ -44,6 +46,7 @@ class RTIPost(db.Model):
         return {
             "id": self.id,
             "title": self.title,
+            "description": self.description,
             "department": self.department,
             "state": self.state,
             "pdf_url": self.pdf_url,
