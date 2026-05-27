@@ -53,9 +53,13 @@ def search_rtis():
     
     # Case-insensitive partial text lookups across either Titles or Extracted Document Text blocks
     search_pattern = f"%{query}%"
+    
+    # Using db.or_ and coalesce guarantees NULL safety regardless of DB engine
     results = RTIPost.query.filter(
-        (RTIPost.title.ilike(search_pattern)) | 
-        (RTIPost.extracted_text.ilike(search_pattern))
+        db.or_(
+            RTIPost.title.ilike(search_pattern),
+            db.func.coalesce(RTIPost.extracted_text, '').ilike(search_pattern)
+        )
     ).all()
     
     # DEAD-END INTENT TRACKER SYSTEM: Logs failed attempts automatically
@@ -87,15 +91,28 @@ def upload_rti():
     if file.filename == '':
         return jsonify({"error": "Empty file name chosen"}), 400
 
-    # Ensure local directory is generated
-    os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
+    # Ensure local directories are generated
+    vault_folder = os.path.join(app.root_path, 'vault')
+    uploads_folder = os.path.join(app.root_path, 'static', 'uploads')
+    os.makedirs(vault_folder, exist_ok=True)
+    os.makedirs(uploads_folder, exist_ok=True)
     
-    # Save file asset cleanly to local disk partition
-    file_path = os.path.join(app.config['UPLOAD_FOLDER'], file.filename)
-    file.save(file_path)
+    # Save raw original file to the secure vault
+    raw_file_path = os.path.join(vault_folder, file.filename)
+    file.save(raw_file_path)
     
-    # Run the PDF through your automated text extraction and scrubbing engine
-    extracted_text = redactor.process_document(file_path)
+    # Define where the scrubbed file will go
+    scrubbed_filename = f"scrubbed_{file.filename}"
+    scrubbed_file_path = os.path.join(uploads_folder, scrubbed_filename)
+
+    # Run the PDF through physical redaction, which creates the scrubbed file
+    extracted_text = redactor.process_document(raw_file_path, scrubbed_file_path)
+
+    # --- DEBUGGING SNIPPET: VERIFY TEXT EXTRACTION ---
+    print("\n" + "="*50)
+    print("DEBUG: EXTRACTED PDF TEXT PREVIEW (First 500 chars):")
+    print(repr(extracted_text[:500]) if extracted_text else "[WARNING: NO TEXT EXTRACTED (Is it a scanned image?)]")
+    print("="*50 + "\n")
 
     # Hardcoding a demo user reference (User ID 1) for local system initialization testing
     demo_user = User.query.first()
@@ -109,15 +126,35 @@ def upload_rti():
         title=title,
         department=department,
         state=state,
-        pdf_url=f"/static/uploads/{file.filename}",
+        pdf_url=f"/api/download/", # Will append ID below after commit
+        original_filename=file.filename,
         extracted_text=extracted_text,  # Storing the redacted safe text strings
         is_anonymous=is_anon
     )
     
     db.session.add(new_post)
+    db.session.flush() # Get the ID before committing
+    new_post.pdf_url = f"/api/download/{new_post.id}"
     db.session.commit()
     
     return jsonify({"message": "RTI Post logged and sanitized successfully", "post_id": new_post.id}), 201
+
+
+from flask import send_from_directory
+
+@app.route('/api/download/<int:post_id>', methods=['GET'])
+def download_scrubbed_pdf(post_id):
+    """Secure gatekeeper route that only serves the scrubbed version of the PDF"""
+    post = RTIPost.query.get_or_404(post_id)
+    
+    uploads_folder = os.path.join(app.root_path, 'static', 'uploads')
+    scrubbed_filename = f"scrubbed_{post.original_filename}"
+    
+    file_path = os.path.join(uploads_folder, scrubbed_filename)
+    if not os.path.exists(file_path):
+         return jsonify({"error": "Redacted file not found on server"}), 404
+         
+    return send_from_directory(uploads_folder, scrubbed_filename, as_attachment=False)
 
 
 @app.route('/api/posts/<int:post_id>', methods=['GET'])
@@ -135,6 +172,10 @@ def handle_comments(post_id):
         
         # Pull or verify test uploader user identity profile
         demo_user = User.query.first()
+        if not demo_user:
+            demo_user = User(email="test_citizen@platform.in", password_hash="secure_stub_hash")
+            db.session.add(demo_user)
+            db.session.commit()
         
         new_comment = Comment(
             post_id=post_id,

@@ -1,0 +1,25 @@
+@import "tailwindcss";
+
+:root {
+  --sans: system-ui, 'Segoe UI', Roboto, sans-serif;
+  --mono: ui-monospace, Consolas, monospace;
+  font-family: var(--sans);
+  background-color: #000000;
+  color: #ffffff;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  background-color: #000000;
+}
+
+/* Clear out all old restricted layout blocks so your Tailwind classes can stretch properly */
+#root {
+  width: 100%;
+  min-height: 100vh;
+}

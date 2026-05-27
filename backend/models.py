@@ -26,6 +26,7 @@ class RTIPost(db.Model):
     department = db.Column(db.String(100), nullable=False)
     state = db.Column(db.String(100), nullable=True)
     pdf_url = db.Column(db.Text, nullable=False)
+    original_filename = db.Column(db.String(255), nullable=True)
     extracted_text = db.Column(db.Text, nullable=True)
     
     # Anonymity masking flag
