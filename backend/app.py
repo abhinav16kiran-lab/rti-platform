@@ -31,6 +31,20 @@ redactor = PIIRedactor()
 # Automatically generate PostgreSQL tables on boot up inside local workspace environment
 with app.app_context():
     db.create_all()
+    
+    # Graceful migration: Add columns to existing users table if they don't exist
+    from sqlalchemy import text
+    try:
+        db.session.execute(text('ALTER TABLE users ADD COLUMN name VARCHAR(255)'))
+        db.session.commit()
+    except Exception:
+        db.session.rollback()
+        
+    try:
+        db.session.execute(text('ALTER TABLE users ADD COLUMN phone_number VARCHAR(20)'))
+        db.session.commit()
+    except Exception:
+        db.session.rollback()
 
 # --- RECURSIVE COMMENT TREE HELPER ---
 def build_comment_tree(comments_list):
@@ -57,17 +71,19 @@ def register():
     data = request.get_json()
     email = data.get('email')
     password = data.get('password')
+    name = data.get('name')
+    phone = data.get('phone')
     
     if User.query.filter_by(email=email).first():
         return jsonify({"error": "Email already registered"}), 400
         
     hashed_pw = generate_password_hash(password, method='scrypt')
-    new_user = User(email=email, password_hash=hashed_pw)
+    new_user = User(email=email, password_hash=hashed_pw, name=name, phone_number=phone)
     db.session.add(new_user)
     db.session.commit()
     
     login_user(new_user)
-    return jsonify({"message": "Registered successfully", "user": {"id": new_user.id, "email": new_user.email}})
+    return jsonify({"message": "Registered successfully", "user": {"id": new_user.id, "email": new_user.email, "name": new_user.name}})
 
 @app.route('/api/auth/login', methods=['POST'])
 def login():
@@ -76,7 +92,7 @@ def login():
     
     if user and check_password_hash(user.password_hash, data.get('password')):
         login_user(user)
-        return jsonify({"message": "Logged in successfully", "user": {"id": user.id, "email": user.email}})
+        return jsonify({"message": "Logged in successfully", "user": {"id": user.id, "email": user.email, "name": user.name}})
         
     return jsonify({"error": "Invalid credentials"}), 401
 
@@ -89,7 +105,7 @@ def logout():
 @app.route('/api/auth/me', methods=['GET'])
 def current_user_info():
     if current_user.is_authenticated:
-        return jsonify({"user": {"id": current_user.id, "email": current_user.email}})
+        return jsonify({"user": {"id": current_user.id, "email": current_user.email, "name": current_user.name}})
     return jsonify({"user": None}), 401
 
 

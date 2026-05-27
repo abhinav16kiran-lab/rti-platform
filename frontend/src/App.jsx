@@ -35,11 +35,11 @@ export const AuthProvider = ({ children }) => {
     return { ok: res.ok, data };
   };
 
-  const register = async (email, password) => {
+  const register = async (email, password, name, phone) => {
     const res = await fetch(`${API_BASE}/auth/register`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email, password }),
+      body: JSON.stringify({ email, password, name, phone }),
       credentials: 'include'
     });
     const data = await res.json();
@@ -89,7 +89,7 @@ const Header = () => {
       </Link>
       {user && (
         <div className="flex items-center gap-4">
-          <span className="text-[10px] text-gray-500 font-mono tracking-widest">{user.email}</span>
+          <span className="text-[10px] text-gray-500 font-mono tracking-widest">{user.name || user.email}</span>
           <button 
             onClick={() => { logout(); navigate('/'); }}
             className="text-[10px] bg-white/[0.03] border border-white/10 hover:border-emerald-500/50 px-3 py-1.5 rounded-lg text-gray-400 hover:text-emerald-400 transition-colors"
@@ -112,6 +112,8 @@ const EntryPage = () => {
   const [isLogin, setIsLogin] = useState(true);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [name, setName] = useState('');
+  const [phone, setPhone] = useState('');
   const [error, setError] = useState('');
 
   if (user) return <Navigate to="/dashboard" />;
@@ -119,9 +121,13 @@ const EntryPage = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
-    const action = isLogin ? login : register;
-    const { ok, data } = await action(email, password);
-    if (!ok) setError(data.error || 'Authentication failed');
+    if (isLogin) {
+      const { ok, data } = await login(email, password);
+      if (!ok) setError(data.error || 'Authentication failed');
+    } else {
+      const { ok, data } = await register(email, password, name, phone);
+      if (!ok) setError(data.error || 'Authentication failed');
+    }
   };
 
   return (
@@ -145,6 +151,12 @@ const EntryPage = () => {
             <button onClick={() => setIsLogin(false)} className={`text-xs font-black uppercase tracking-widest pb-2 border-b-2 transition-colors ${!isLogin ? 'border-emerald-500 text-white' : 'border-transparent text-gray-600'}`}>Register</button>
           </div>
           <form onSubmit={handleSubmit} className="space-y-4">
+            {!isLogin && (
+              <>
+                <input type="text" placeholder="Full Name" value={name} onChange={e => setName(e.target.value)} required className="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-3.5 text-xs text-white focus:outline-none focus:border-emerald-500 transition-colors" />
+                <input type="tel" placeholder="Phone Number" value={phone} onChange={e => setPhone(e.target.value)} required className="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-3.5 text-xs text-white focus:outline-none focus:border-emerald-500 transition-colors" />
+              </>
+            )}
             <input type="email" placeholder="Citizen Email" value={email} onChange={e => setEmail(e.target.value)} required className="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-3.5 text-xs text-white focus:outline-none focus:border-emerald-500 transition-colors" />
             <input type="password" placeholder="Secure Password" value={password} onChange={e => setPassword(e.target.value)} required className="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-3.5 text-xs text-white focus:outline-none focus:border-emerald-500 transition-colors" />
             {error && <p className="text-red-400 text-[10px] font-mono">{error}</p>}

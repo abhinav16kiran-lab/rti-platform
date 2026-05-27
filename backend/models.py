@@ -11,6 +11,8 @@ class User(db.Model, UserMixin):
     id = db.Column(db.Integer, primary_key=True)
     email = db.Column(db.String(120), unique=True, nullable=False)
     password_hash = db.Column(db.String(255), nullable=False)
+    name = db.Column(db.String(255), nullable=True)
+    phone_number = db.Column(db.String(20), nullable=True)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     
     # Links to track what this user has posted/commented
@@ -53,7 +55,7 @@ class RTIPost(db.Model):
             "extracted_text": self.extracted_text,
             "status": self.status,
             "created_at": self.created_at.isoformat(),
-            "author": "Anonymous Citizen" if self.is_anonymous else self.author_profile.email
+            "author": "Anonymous Citizen" if self.is_anonymous else (self.author_profile.name or self.author_profile.email.split('@')[0])
         }
 
 
@@ -86,7 +88,7 @@ class Comment(db.Model):
             "parent_id": self.parent_id,
             "comment_text": self.comment_text,
             "created_at": self.created_at.isoformat(),
-            "author": self.commenter.email.split('@')[0], # Safe fallback display identity
+            "author": self.commenter.name or self.commenter.email.split('@')[0], # Safe fallback display identity
             "replies": [] # Populated dynamically by the controller logic tree
         }
 
